@@ -94,9 +94,8 @@ export class XenPayClient {
         const headers: Record<string, string> = {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'User-Agent': 'CrazyWallet-XenPayClient/1.0',
-          'x-api-key': this.config.apiKey,
-          'Authorization': `Bearer ${this.config.apiKey}`,
+          'X-API-KEY': this.config.apiKey,
+          'X-API-SECRET': this.config.apiSecret,
         };
 
         const response = await fetch(url, {

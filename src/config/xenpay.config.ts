@@ -32,9 +32,9 @@ export const xenPayConfig: XenPayConfig = {
     backoffFactor: 2,
   },
   endpoints: {
-    createOrder: '/order/create',
-    getStatus: '/order/status',
-    getBalance: '/balance',
-    getAdvisedAmounts: '/advised-amounts',
+    createOrder: '/create_order.php',
+    getStatus: '/status.php',
+    getBalance: '/balance.php',
+    getAdvisedAmounts: '/advised_amount.php',
   },
 };

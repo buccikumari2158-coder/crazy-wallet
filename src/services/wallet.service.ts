@@ -96,25 +96,16 @@ export class WalletService {
     const breakdown = this.calculateDepositFees(params.amount);
     const merchantOrderId = `CW_DEP_${Date.now()}_${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
 
-    // 1. Call XenPay Create Order
-    let gatewayOrder;
-    try {
-      gatewayOrder = await this.xenpayClient.createOrder({
-        amount: params.amount,
-        merchant_order_id: merchantOrderId,
-        redirect_url: params.redirectUrl || 'http://localhost:3000',
-        customer_name: user.name,
-        customer_email: user.email,
-        customer_phone: '9876543210',
-      });
-    } catch (err: any) {
-      console.warn(`[XenPay Gateway Call] Falling back to simulated payment URL for testing: ${err.message}`);
-      // Fallback for offline/local simulation
-      gatewayOrder = {
-        order_id: `ORD_${Date.now().toString(36).toUpperCase()}`,
-        payment_url: `https://xen-pays.space/pay/?id=ORD_${merchantOrderId}`,
-      };
-    }
+    // 1. Call Real XenPay Create Order API
+    const redirectUrl = params.redirectUrl || process.env.PAYMENT_REDIRECT_URL || 'https://dadrummy.com';
+    const gatewayOrder = await this.xenpayClient.createOrder({
+      amount: params.amount,
+      merchant_order_id: merchantOrderId,
+      redirect_url: redirectUrl,
+      customer_name: user.name || 'Rahul Sharma',
+      customer_email: user.email || 'rahul@creator.com',
+      customer_phone: '9876543210',
+    });
 
     // 2. Generate 5-minute QR code Data URL
     const qrCodeDataUrl = await generateQrCodeDataUrl(gatewayOrder.payment_url);
