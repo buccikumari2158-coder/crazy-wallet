@@ -786,7 +786,8 @@
         </div>
 
         <div class="qr-card">
-          <canvas id="qr-canvas"></canvas>
+          <img id="qr-img" src="" alt="Payment QR Code" style="width: 220px; height: 220px; display: block; border-radius: 8px;" />
+          <canvas id="qr-canvas" style="display: none;"></canvas>
           <p style="color: #475569; font-size: 11px; margin-top: 10px; font-weight: 600;">
             Scan with GPay, PhonePe, Paytm, or BHIM
           </p>
@@ -1086,13 +1087,20 @@
       document.getElementById('qr-display-amount').textContent = `₹${dep.breakdown.grossAmount.toFixed(2)}`;
       document.getElementById('qr-display-net').textContent = `₹${dep.breakdown.netCredited.toFixed(2)}`;
 
-      // Render Dynamic QR to Canvas
-      if (window.QRCode) {
-        QRCode.toCanvas(document.getElementById('qr-canvas'), dep.paymentUrl, {
-          width: 220,
-          margin: 1,
-          color: { dark: '#090b0e', light: '#ffffff' }
-        });
+      // Render Dynamic QR: Use backend generated Data URL for 100% reliable rendering
+      const qrImg = document.getElementById('qr-img');
+      if (qrImg && dep.qrCodeDataUrl) {
+        qrImg.src = dep.qrCodeDataUrl;
+      } else if (window.QRCode) {
+        const canvas = document.getElementById('qr-canvas');
+        if (canvas) {
+          canvas.style.display = 'block';
+          QRCode.toCanvas(canvas, dep.paymentUrl, {
+            width: 220,
+            margin: 1,
+            color: { dark: '#090b0e', light: '#ffffff' }
+          });
+        }
       }
 
       // Start 5-Minute Countdown Timer (300 seconds)
