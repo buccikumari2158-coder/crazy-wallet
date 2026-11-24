@@ -1,0 +1,36 @@
+{
+  "name": "crazy-wallet-payment-gateway",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Production-grade XenPay API Integration for Crazy Wallet",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "tsx watch src/server.ts",
+    "test": "tsx --test test/**/*.test.ts"
+  },
+  "keywords": [
+    "payment-gateway",
+    "xenpay",
+    "crypto",
+    "wallet",
+    "webhook",
+    "qr-code"
+  ],
+  "author": "Crazy Wallet Engineering Team",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.13.4",
+    "@types/qrcode": "^1.5.5",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3"
+  }
+}

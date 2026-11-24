@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crazy Wallet — Creator Wallet & Admin Treasury</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+  <style>
+    :root {
+      --bg: #090b0e;
+      --card-bg: #11161d;
+      --card-border: #1e2632;
+      --card-hover: #161e28;
+      --primary: #10b981;
+      --primary-glow: rgba(16, 185, 129, 0.25);
+      --amber: #f59e0b;
+      --amber-glow: rgba(245, 158, 11, 0.2);
+      --rose: #ef4444;
+      --rose-glow: rgba(239, 68, 68, 0.2);
+      --indigo: #6366f1;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .mono { font-family: 'JetBrains Mono', monospace; }
+
+    /* Top Nav */
+    header {
+      background: rgba(17, 22, 29, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--card-border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: 14px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #fff;
+    }
+    .logo-badge {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 0 15px var(--primary-glow);
+    }
+    .brand h1 { font-size: 18px; font-weight: 800; letter-spacing: -0.3px; }
+    .brand span { color: var(--primary); }
+
+    .nav-tabs {
+      display: flex;
+      background: #0d1117;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 4px;
+      gap: 4px;
+    }
+    .nav-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .nav-btn.active {
+      background: var(--card-border);
+      color: #fff;
+    }
+    .nav-btn:hover:not(.active) { color: #fff; }
+
+    .user-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #141b24;
+      border: 1px solid var(--card-border);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--primary);
+      box-shadow: 0 0 8px var(--primary);
+    }
+
+    /* Container */
+    main {
+      flex: 1;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 28px 20px 60px;
+    }
+
+    /* Stat Cards Grid */
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 18px;
+      margin-bottom: 28px;
+    }
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 22px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.2s ease;
+    }
+    .card:hover {
+      border-color: #2b3545;
+      transform: translateY(-2px);
+    }
+    .card-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .card-val {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+    .card-sub {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    .val-emerald { color: #34d399; }
+    .val-amber { color: #fbbf24; }
+    .val-indigo { color: #818cf8; }
+
+    /* Actions Bar */
+    .actions-bar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: none;
+      transition: all 0.2s ease;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #fff;
+      box-shadow: 0 4px 16px var(--primary-glow);
+    }
+    .btn-primary:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: #1b232f;
+      color: #fff;
+      border: 1px solid #283446;
+    }
+    .btn-secondary:hover {
+      background: #232d3d;
+      border-color: #384860;
+    }
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.25);
+    }
+
+    /* Section Headers */
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Table */
+    .table-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 32px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13px;
+    }
+    th {
+      background: #0d1218;
+      padding: 14px 18px;
+      color: var(--text-dim);
+      font-weight: 600;
+      border-bottom: 1px solid var(--card-border);
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+    }
+    td {
+      padding: 16px 18px;
+      border-bottom: 1px solid #161d26;
+      color: var(--text-muted);
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255, 255, 255, 0.02); }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .badge-success { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-pending { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .badge-expired { background: rgba(148, 163, 184, 0.15); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.3); }
+    .badge-failed { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+    /* Modals */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 16px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: #111720;
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 460px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      animation: modalIn 0.25s ease-out;
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .modal-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-header h3 { font-size: 17px; font-weight: 700; color: #fff; }
+    .close-btn {
+      background: none; border: none; font-size: 20px; color: var(--text-dim); cursor: pointer;
+    }
+    .close-btn:hover { color: #fff; }
+
+    .modal-body { padding: 24px; }
+
+    .input-group {
+      margin-bottom: 18px;
+    }
+    .input-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      display: block;
+    }
+    .input-field {
+      width: 100%;
+      background: #090d12;
+      border: 1px solid #222d3d;
+      border-radius: 12px;
+      padding: 12px 16px;
+      color: #fff;
+      font-size: 16px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .input-field:focus { border-color: var(--primary); }
+
+    .chip-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+    .chip {
+      background: #161e29;
+      border: 1px solid #243042;
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .chip:hover, .chip.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    /* Breakdown Box */
+    .breakdown-box {
+      background: #0d1218;
+      border: 1px solid #1c2532;
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+      font-size: 13px;
+    }
+    .breakdown-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      color: var(--text-muted);
+    }
+    .breakdown-row:last-child {
+      margin-bottom: 0;
+      padding-top: 8px;
+      border-top: 1px dashed #222e3f;
+      font-weight: 700;
+      color: #fff;
+    }
+    .fee-notice {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 8px;
+      line-height: 1.4;
+    }
+
+    /* Dynamic QR Screen */
+    .qr-card {
+      background: #ffffff;
+      padding: 18px;
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0 auto 16px;
+      width: fit-content;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+    .qr-card canvas {
+      width: 220px !important;
+      height: 220px !important;
+      display: block;
+    }
+
+    .timer-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      margin-bottom: 14px;
+    }
+
+    /* Poller pulsing dot */
+    .poller-status {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 12px;
+    }
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      animation: pulseAnim 1.4s infinite;
+    }
+    @keyframes pulseAnim {
+      0% { transform: scale(0.9); opacity: 0.6; }
+      50% { transform: scale(1.3); opacity: 1; }
+      100% { transform: scale(0.9); opacity: 0.6; }
+    }
+
+    .success-celebration {
+      text-align: center;
+      padding: 24px 12px;
+    }
+    .celebration-icon {
+      width: 60px;
+      height: 60px;
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 2px solid #10b981;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      margin: 0 auto 16px;
+    }
+
+    /* Banner */
+    .banner {
+      background: linear-gradient(90deg, #13241b 0%, #111a26 100%);
+      border: 1px solid #1d3e2d;
+      border-radius: 14px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .banner-text h4 { font-size: 14px; font-weight: 700; color: #6ee7b7; margin-bottom: 2px; }
+    .banner-text p { font-size: 12px; color: #94a3b8; }
+
+    /* Hidden utility */
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header>
+    <a href="#" class="brand" onclick="switchTab('creator')">
+      <div class="logo-badge">⚡</div>
+      <div>
+        <h1>Crazy<span>Wallet</span></h1>
+      </div>
+    </a>
+
+    <!-- Role Switcher -->
+    <div class="nav-tabs">
+      <button class="nav-btn active" id="tab-btn-creator" onclick="switchTab('creator')">
+        👤 Creator Portal
+      </button>
+      <button class="nav-btn" id="tab-btn-admin" onclick="switchTab('admin')">
+        🛡️ Admin Panel
+      </button>
+    </div>
+
+    <!-- Active User Profile Pill -->
+    <div class="user-pill">
+      <div class="status-dot"></div>
+      <span id="nav-user-label" class="mono">Rahul Sharma (Creator)</span>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ============================================== -->
+    <!-- 1. CREATOR VIEW                                -->
+    <!-- ============================================== -->
+    <div id="view-creator">
+
+      <!-- Middleman Fee Info Banner -->
+      <div class="banner">
+        <div class="banner-text">
+          <h4>💡 Transparent Fee Architecture</h4>
+          <p>XenPay gateway charges 14% + ₹10. Crazy Wallet platform charges 20% + ₹15 on deposits & withdrawals.</p>
+        </div>
+        <div class="badge badge-success">Live Middleman Margin: 6% + ₹5</div>
+      </div>
+
+      <!-- 3 Key Metric Cards -->
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-label">
+            <span>Ready to Withdraw</span>
+            <span>💰</span>
+          </div>
+          <div class="card-val val-emerald mono" id="creator-ready-bal">₹3,985.00</div>
+          <div class="card-sub">Available instantly to request bank / UPI withdrawal</div>
+        </div>
+
+        <div class="card">
+          <div class="card-label">
+            <span>Total Deposited</span>
+            <span>📥</span>
+          </div>
+          <div class="card-val mono" id="creator-total-dep">₹5,000.00</div>
+          <div class="card-sub">All-time gross deposited into Crazy Wallet</div>
+        </div>
+
+        <div class="card">
+          <div class="card-label">
+            <span>Pending Withdrawal</span>
+            <span>⏳</span>
+          </div>
+          <div class="card-val val-amber mono" id="creator-pending-wth">₹0.00</div>
+          <div class="card-sub">In Admin review queue for bank dispatch</div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="actions-bar">
+        <button class="btn btn-primary" onclick="openDepositModal()">
+          <span>💳</span> Deposit via Dynamic QR
+        </button>
+        <button class="btn btn-secondary" onclick="openWithdrawModal()">
+          <span>💸</span> Request Withdrawal
+        </button>
+      </div>
+
+      <!-- Creator Transaction History -->
+      <div class="section-title">
+        <span>📋</span> My Wallet History
+      </div>
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Order Ref</th>
+              <th>Gross Amount</th>
+              <th>Admin Fee (20%+₹15)</th>
+              <th>Net Credited / Payout</th>
+              <th>Status</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="creator-tx-body">
+            <!-- Dynamic transactions -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+
+    <!-- ============================================== -->
+    <!-- 2. ADMIN VIEW                                  -->
+    <!-- ============================================== -->
+    <div id="view-admin" class="hidden">
+
+      <div class="banner" style="background: linear-gradient(90deg, #1b162b 0%, #111a26 100%); border-color: #3b2861;">
+        <div class="banner-text">
+          <h4 style="color: #c084fc;">🛡️ Admin Middleman Treasury & Approval Hub</h4>
+          <p>Review XenPay Gateway Liquidity, approve creator payouts, and inspect net platform profit margins.</p>
+        </div>
+        <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;" onclick="loadAdminMetrics()">🔄 Sync XenPay Balance</button>
+      </div>
+
+      <!-- Admin 4 Stat Cards -->
+      <div class="grid-4">
+        <div class="card">
+          <div class="card-label">
+            <span>XenPay Live Balance</span>
+            <span>🌐</span>
+          </div>
+          <div class="card-val val-indigo mono" id="admin-xenpay-bal">₹12,500.50</div>
+          <div class="card-sub">Polled live from <span class="mono">xen-pays.space/api/balance.php</span></div>
+        </div>
+
+        <div class="card">
+          <div class="card-label">
+            <span>Creators Liability</span>
+            <span>👥</span>
+          </div>
+          <div class="card-val mono" id="admin-creators-bal">₹3,985.00</div>
+          <div class="card-sub">Total ready-to-withdraw funds across all creators</div>
+        </div>
+
+        <div class="card">
+          <div class="card-label">
+            <span>Admin Net Profit</span>
+            <span>📈</span>
+          </div>
+          <div class="card-val val-emerald mono" id="admin-net-profit">₹305.00</div>
+          <div class="card-sub">Retained margin: 6% + ₹5 per transaction</div>
+        </div>
+
+        <div class="card">
+          <div class="card-label">
+            <span>Pending Approvals</span>
+            <span>⏳</span>
+          </div>
+          <div class="card-val val-amber mono" id="admin-pending-count">0</div>
+          <div class="card-sub">Withdrawals awaiting Admin sign-off</div>
+        </div>
+      </div>
+
+      <!-- Pending Withdrawals Queue -->
+      <div class="section-title">
+        <span>⚡</span> Pending Withdrawal Approvals Queue
+      </div>
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Creator</th>
+              <th>Requested</th>
+              <th>Admin Fee (20%+₹15)</th>
+              <th>Net Payout</th>
+              <th>Destination (UPI/Bank)</th>
+              <th>Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="admin-withdrawals-body">
+            <!-- Dynamic approvals -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Deposit Audit & Profit Ledger -->
+      <div class="section-title">
+        <span>📊</span> Deposit Audit & Margin Ledger
+      </div>
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Deposit Ref</th>
+              <th>Creator</th>
+              <th>Gross Paid</th>
+              <th>Admin Fee (20%+₹15)</th>
+              <th>XenPay Cost (14%+₹10)</th>
+              <th>Admin Net Margin</th>
+              <th>Status</th>
+              <th>UTR</th>
+            </tr>
+          </thead>
+          <tbody id="admin-deposits-body">
+            <!-- Dynamic deposits -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Registered Creators -->
+      <div class="section-title">
+        <span>👥</span> Registered Creators
+      </div>
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Total Deposited</th>
+              <th>Ready to Withdraw</th>
+              <th>Pending Locked</th>
+              <th>Joined</th>
+            </tr>
+          </thead>
+          <tbody id="admin-creators-body">
+            <!-- Dynamic creators -->
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+  </main>
+
+
+  <!-- ============================================== -->
+  <!-- MODAL: DEPOSIT (5-MIN DYNAMIC QR)              -->
+  <!-- ============================================== -->
+  <div class="modal-overlay" id="modal-deposit">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>💳 Deposit to Crazy Wallet</h3>
+        <button class="close-btn" onclick="closeDepositModal()">✕</button>
+      </div>
+
+      <!-- Step 1: Amount Selection Form -->
+      <div class="modal-body" id="deposit-form-step">
+        <div class="input-group">
+          <label class="input-label">Deposit Amount (₹)</label>
+          <input type="number" id="dep-amount-input" class="input-field mono" value="500" min="50" max="500000" oninput="updateDepositBreakdown()" />
+        </div>
+
+        <div class="chip-group">
+          <button class="chip" onclick="setDepositAmount(100)">₹100</button>
+          <button class="chip active" onclick="setDepositAmount(500)">₹500</button>
+          <button class="chip" onclick="setDepositAmount(1000)">₹1,000</button>
+          <button class="chip" onclick="setDepositAmount(2000)">₹2,000</button>
+          <button class="chip" onclick="setDepositAmount(5000)">₹5,000</button>
+        </div>
+
+        <!-- Real-Time Breakdown -->
+        <div class="breakdown-box">
+          <div class="breakdown-row">
+            <span>Deposit Gross Amount:</span>
+            <span class="mono" id="breakdown-gross">₹500.00</span>
+          </div>
+          <div class="breakdown-row">
+            <span>Admin Fee (20% + ₹15):</span>
+            <span class="mono" style="color: #f87171;" id="breakdown-fee">-₹115.00</span>
+          </div>
+          <div class="breakdown-row">
+            <span>Net Credited to Wallet:</span>
+            <span class="mono" style="color: #34d399;" id="breakdown-net">₹385.00</span>
+          </div>
+          <p class="fee-notice">
+            * XenPay gateway charges 14% + ₹10. Platform fee is 20% + ₹15. Funds will be credited directly to your Ready to Withdraw balance.
+          </p>
+        </div>
+
+        <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="generateDynamicQr()">
+          ⚡ Generate 5-Minute UPI QR
+        </button>
+      </div>
+
+      <!-- Step 2: Dynamic 5-Minute QR Screen -->
+      <div class="modal-body hidden" id="deposit-qr-step" style="text-align: center;">
+        <div class="timer-badge" id="qr-timer-badge">
+          <span>⏱️ Window closes in:</span>
+          <span class="mono" id="qr-countdown" style="font-size: 15px;">05:00</span>
+        </div>
+
+        <div class="qr-card">
+          <canvas id="qr-canvas"></canvas>
+          <p style="color: #475569; font-size: 11px; margin-top: 10px; font-weight: 600;">
+            Scan with GPay, PhonePe, Paytm, or BHIM
+          </p>
+        </div>
+
+        <div style="margin-bottom: 16px; font-size: 13px; color: var(--text-muted);">
+          Paying <strong class="mono" style="color: #fff;" id="qr-display-amount">₹500.00</strong> (Net Credit: <span class="mono val-emerald" id="qr-display-net">₹385.00</span>)
+        </div>
+
+        <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 14px;">
+          <button class="btn btn-secondary" style="padding: 8px 14px; font-size: 12px;" id="btn-open-payment" onclick="openPaymentLink()">
+            📱 Open in UPI App
+          </button>
+          <button class="btn btn-secondary" style="padding: 8px 14px; font-size: 12px;" onclick="copyPaymentUrl()">
+            📋 Copy Link
+          </button>
+        </div>
+
+        <!-- Expired notice if timed out -->
+        <div id="qr-expired-notice" class="hidden" style="margin-bottom: 14px;">
+          <p style="color: #f87171; font-size: 13px; font-weight: 600; margin-bottom: 8px;">⚠️ QR Expired after 5 minutes</p>
+          <button class="btn btn-primary" style="padding: 8px 16px; font-size: 13px;" onclick="generateDynamicQr()">🔄 Generate New QR</button>
+        </div>
+
+        <div class="poller-status" id="qr-poller-status">
+          <div class="pulse-dot"></div>
+          <span>Auto-detecting bank payment (polling every 2.5s)...</span>
+        </div>
+      </div>
+
+      <!-- Step 3: Success Celebration Screen -->
+      <div class="modal-body hidden" id="deposit-success-step">
+        <div class="success-celebration">
+          <div class="celebration-icon">✓</div>
+          <h3 style="font-size: 20px; font-weight: 800; margin-bottom: 6px;">Payment Received!</h3>
+          <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 16px;">
+            Your deposit was confirmed and funds have been credited to your Ready to Withdraw balance.
+          </p>
+          <div class="breakdown-box" style="text-align: left;">
+            <div class="breakdown-row"><span>Gross Paid:</span><span class="mono" id="suc-gross">₹500.00</span></div>
+            <div class="breakdown-row"><span>Platform Fee (20%+₹15):</span><span class="mono" id="suc-fee">-₹115.00</span></div>
+            <div class="breakdown-row"><span>Net Credited:</span><span class="mono val-emerald" id="suc-net">₹385.00</span></div>
+            <div class="breakdown-row"><span>Bank UTR:</span><span class="mono" id="suc-utr">UTR9283741</span></div>
+          </div>
+          <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="closeDepositModal()">Done</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ============================================== -->
+  <!-- MODAL: WITHDRAWAL REQUEST                      -->
+  <!-- ============================================== -->
+  <div class="modal-overlay" id="modal-withdraw">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>💸 Request Payout / Withdrawal</h3>
+        <button class="close-btn" onclick="closeWithdrawModal()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div style="background: #0d1218; border: 1px solid #1c2532; border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 12px; color: var(--text-muted);">Available to Withdraw:</span>
+          <span class="mono val-emerald" style="font-weight: 700; font-size: 15px;" id="wth-avail-bal">₹3,985.00</span>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">Withdrawal Amount (₹)</label>
+          <input type="number" id="wth-amount-input" class="input-field mono" value="1000" min="100" oninput="updateWithdrawBreakdown()" />
+        </div>
+
+        <!-- Real-Time Fee Breakdown -->
+        <div class="breakdown-box">
+          <div class="breakdown-row">
+            <span>Requested Amount:</span>
+            <span class="mono" id="wth-breakdown-gross">₹1,000.00</span>
+          </div>
+          <div class="breakdown-row">
+            <span>Platform Fee (20% + ₹15):</span>
+            <span class="mono" style="color: #f87171;" id="wth-breakdown-fee">-₹215.00</span>
+          </div>
+          <div class="breakdown-row">
+            <span>Net Transferred to You:</span>
+            <span class="mono val-emerald" id="wth-breakdown-net">₹785.00</span>
+          </div>
+        </div>
+
+        <!-- Destination Selection -->
+        <div class="input-group">
+          <label class="input-label">Payout Method</label>
+          <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+            <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer;">
+              <input type="radio" name="payoutMethod" value="UPI" checked onchange="togglePayoutFields('UPI')" /> UPI ID
+            </label>
+            <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer;">
+              <input type="radio" name="payoutMethod" value="BANK" onchange="togglePayoutFields('BANK')" /> Bank Account
+            </label>
+          </div>
+
+          <div id="field-upi">
+            <input type="text" id="wth-upi-id" class="input-field" placeholder="e.g. rahul@okaxis or 9876543210@paytm" value="rahul@okaxis" />
+          </div>
+
+          <div id="field-bank" class="hidden">
+            <input type="text" id="wth-bank-acc" class="input-field" placeholder="Bank Account Number" style="margin-bottom: 8px;" />
+            <input type="text" id="wth-bank-ifsc" class="input-field" placeholder="IFSC Code (e.g. HDFC0001234)" style="margin-bottom: 8px;" />
+            <input type="text" id="wth-bank-name" class="input-field" placeholder="Beneficiary Account Holder Name" />
+          </div>
+        </div>
+
+        <p style="font-size: 11px; color: var(--text-dim); margin-bottom: 16px; line-height: 1.4;">
+          * Upon submission, funds move to <strong>Pending Withdrawal</strong> and appear in Admin Review. Once Admin approves, funds disburse via XenPay to your UPI/Bank.
+        </p>
+
+        <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="submitWithdrawal()">
+          🚀 Submit Payout Request
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- JavaScript App Logic -->
+  <script>
+    // App State
+    let currentTab = 'creator';
+    let currentUserId = 'usr_creator_001';
+    let activeDeposit = null;
+    let qrTimerInterval = null;
+    let qrPollInterval = null;
+    let remainingSeconds = 300;
+
+    // Initialize App
+    window.addEventListener('DOMContentLoaded', () => {
+      loadCreatorData();
+      loadAdminMetrics();
+      updateDepositBreakdown();
+      updateWithdrawBreakdown();
+    });
+
+    // Tab Switching
+    function switchTab(tab) {
+      currentTab = tab;
+      const creatorView = document.getElementById('view-creator');
+      const adminView = document.getElementById('view-admin');
+      const btnCreator = document.getElementById('tab-btn-creator');
+      const btnAdmin = document.getElementById('tab-btn-admin');
+      const userLabel = document.getElementById('nav-user-label');
+
+      if (tab === 'creator') {
+        creatorView.classList.remove('hidden');
+        adminView.classList.add('hidden');
+        btnCreator.classList.add('active');
+        btnAdmin.classList.remove('active');
+        userLabel.textContent = 'Rahul Sharma (Creator)';
+        loadCreatorData();
+      } else {
+        creatorView.classList.add('hidden');
+        adminView.classList.remove('hidden');
+        btnCreator.classList.remove('active');
+        btnAdmin.classList.add('active');
+        userLabel.textContent = '🛡️ Crazy Wallet Admin';
+        loadAdminMetrics();
+      }
+    }
+
+    // Load Creator Profile & Transactions
+    async function loadCreatorData() {
+      try {
+        const res = await fetch(`/api/user/profile/${currentUserId}`);
+        const data = await res.json();
+        if (data.success && data.user) {
+          document.getElementById('creator-ready-bal').textContent = `₹${data.user.withdrawableBalance.toFixed(2)}`;
+          document.getElementById('creator-total-dep').textContent = `₹${data.user.depositBalance.toFixed(2)}`;
+          document.getElementById('creator-pending-wth').textContent = `₹${data.user.pendingWithdrawalBalance.toFixed(2)}`;
+          document.getElementById('wth-avail-bal').textContent = `₹${data.user.withdrawableBalance.toFixed(2)}`;
+        }
+
+        const txRes = await fetch(`/api/creator/transactions/${currentUserId}`);
+        const txData = await txRes.json();
+        if (txData.success) {
+          renderCreatorTransactions(txData.data);
+        }
+      } catch (err) {
+        console.error('Failed to load creator data:', err);
+      }
+    }
+
+    function renderCreatorTransactions(list) {
+      const tbody = document.getElementById('creator-tx-body');
+      if (!list || list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-dim);">No transactions yet. Deposit or request a withdrawal above!</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map(tx => {
+        let statusBadge = `<span class="badge badge-pending">PENDING</span>`;
+        if (tx.status === 'SUCCESS' || tx.status === 'APPROVED') statusBadge = `<span class="badge badge-success">SUCCESS</span>`;
+        else if (tx.status === 'EXPIRED') statusBadge = `<span class="badge badge-expired">EXPIRED</span>`;
+        else if (tx.status === 'FAILED' || tx.status === 'REJECTED') statusBadge = `<span class="badge badge-failed">${tx.status}</span>`;
+
+        return `
+          <tr>
+            <td style="font-weight: 700; color: ${tx.type === 'DEPOSIT' ? '#34d399' : '#818cf8'};">
+              ${tx.type === 'DEPOSIT' ? '📥 DEPOSIT' : '💸 WITHDRAW'}
+            </td>
+            <td class="mono" style="font-size: 11px;">${tx.merchantOrderId}</td>
+            <td class="mono" style="font-weight: 600; color: #fff;">₹${tx.grossAmount.toFixed(2)}</td>
+            <td class="mono" style="color: #f87171;">-₹${tx.adminFee.toFixed(2)}</td>
+            <td class="mono val-emerald" style="font-weight: 700;">₹${tx.netAmount.toFixed(2)}</td>
+            <td>${statusBadge}</td>
+            <td style="font-size: 11px;">${new Date(tx.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Modal Controls
+    function openDepositModal() {
+      document.getElementById('modal-deposit').classList.add('open');
+      document.getElementById('deposit-form-step').classList.remove('hidden');
+      document.getElementById('deposit-qr-step').classList.add('hidden');
+      document.getElementById('deposit-success-step').classList.add('hidden');
+      updateDepositBreakdown();
+    }
+    function closeDepositModal() {
+      document.getElementById('modal-deposit').classList.remove('open');
+      clearInterval(qrTimerInterval);
+      clearInterval(qrPollInterval);
+      loadCreatorData();
+    }
+
+    function openWithdrawModal() {
+      document.getElementById('modal-withdraw').classList.add('open');
+      updateWithdrawBreakdown();
+    }
+    function closeWithdrawModal() {
+      document.getElementById('modal-withdraw').classList.remove('open');
+      loadCreatorData();
+    }
+
+    // Deposit Math
+    function setDepositAmount(val) {
+      document.getElementById('dep-amount-input').value = val;
+      document.querySelectorAll('.chip-group .chip').forEach(c => {
+        c.classList.toggle('active', c.textContent === `₹${val.toLocaleString('en-IN')}`);
+      });
+      updateDepositBreakdown();
+    }
+
+    function updateDepositBreakdown() {
+      const amt = Number(document.getElementById('dep-amount-input').value) || 0;
+      const fee = Math.round((amt * 0.20 + 15) * 100) / 100;
+      const net = Math.max(0, Math.round((amt - fee) * 100) / 100);
+
+      document.getElementById('breakdown-gross').textContent = `₹${amt.toFixed(2)}`;
+      document.getElementById('breakdown-fee').textContent = `-₹${fee.toFixed(2)}`;
+      document.getElementById('breakdown-net').textContent = `₹${net.toFixed(2)}`;
+    }
+
+    // 5-Minute Dynamic QR Generation
+    async function generateDynamicQr() {
+      const amount = Number(document.getElementById('dep-amount-input').value);
+      if (!amount || amount < 50) {
+        alert('Minimum deposit amount is ₹50 to cover platform gateway fees.');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/creator/deposit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: currentUserId, amount }),
+        });
+        const json = await res.json();
+        if (!json.success) {
+          alert(`Error: ${json.message}`);
+          return;
+        }
+
+        activeDeposit = json.data;
+        showQrScreen(activeDeposit);
+      } catch (err) {
+        alert('Failed to connect to gateway: ' + err.message);
+      }
+    }
+
+    function showQrScreen(dep) {
+      document.getElementById('deposit-form-step').classList.add('hidden');
+      document.getElementById('deposit-qr-step').classList.remove('hidden');
+      document.getElementById('deposit-success-step').classList.add('hidden');
+      document.getElementById('qr-expired-notice').classList.add('hidden');
+      document.getElementById('qr-poller-status').classList.remove('hidden');
+
+      document.getElementById('qr-display-amount').textContent = `₹${dep.breakdown.grossAmount.toFixed(2)}`;
+      document.getElementById('qr-display-net').textContent = `₹${dep.breakdown.netCredited.toFixed(2)}`;
+
+      // Render Dynamic QR to Canvas
+      if (window.QRCode) {
+        QRCode.toCanvas(document.getElementById('qr-canvas'), dep.paymentUrl, {
+          width: 220,
+          margin: 1,
+          color: { dark: '#090b0e', light: '#ffffff' }
+        });
+      }
+
+      // Start 5-Minute Countdown Timer (300 seconds)
+      clearInterval(qrTimerInterval);
+      clearInterval(qrPollInterval);
+      remainingSeconds = 300;
+
+      qrTimerInterval = setInterval(() => {
+        remainingSeconds--;
+        if (remainingSeconds <= 0) {
+          clearInterval(qrTimerInterval);
+          clearInterval(qrPollInterval);
+          document.getElementById('qr-countdown').textContent = "00:00 (Expired)";
+          document.getElementById('qr-expired-notice').classList.remove('hidden');
+          document.getElementById('qr-poller-status').classList.add('hidden');
+          return;
+        }
+        const m = Math.floor(remainingSeconds / 60);
+        const s = remainingSeconds % 60;
+        document.getElementById('qr-countdown').textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+      }, 1000);
+
+      // Start Auto-Polling Check every 2.5 seconds
+      qrPollInterval = setInterval(async () => {
+        try {
+          const res = await fetch(`/api/creator/deposit/status/${dep.merchantOrderId}`);
+          const data = await res.json();
+          if (data.success && data.data) {
+            if (data.data.status === 'SUCCESS') {
+              clearInterval(qrTimerInterval);
+              clearInterval(qrPollInterval);
+              showDepositSuccess(data.data);
+            }
+          }
+        } catch (e) {
+          console.warn('Poll skip:', e);
+        }
+      }, 2500);
+    }
+
+    function openPaymentLink() {
+      if (activeDeposit && activeDeposit.paymentUrl) {
+        window.open(activeDeposit.paymentUrl, '_blank');
+      }
+    }
+
+    function copyPaymentUrl() {
+      if (activeDeposit && activeDeposit.paymentUrl) {
+        navigator.clipboard.writeText(activeDeposit.paymentUrl);
+        alert('Copied payment URL to clipboard!');
+      }
+    }
+
+    function showDepositSuccess(tx) {
+      document.getElementById('deposit-qr-step').classList.add('hidden');
+      document.getElementById('deposit-success-step').classList.remove('hidden');
+
+      document.getElementById('suc-gross').textContent = `₹${tx.grossAmount.toFixed(2)}`;
+      document.getElementById('suc-fee').textContent = `-₹${tx.adminFee.toFixed(2)}`;
+      document.getElementById('suc-net').textContent = `₹${tx.netAmount.toFixed(2)}`;
+      document.getElementById('suc-utr').textContent = tx.utr || 'Bank Confirmed';
+    }
+
+    // Withdrawal Logic
+    function updateWithdrawBreakdown() {
+      const amt = Number(document.getElementById('wth-amount-input').value) || 0;
+      const fee = Math.round((amt * 0.20 + 15) * 100) / 100;
+      const net = Math.max(0, Math.round((amt - fee) * 100) / 100);
+
+      document.getElementById('wth-breakdown-gross').textContent = `₹${amt.toFixed(2)}`;
+      document.getElementById('wth-breakdown-fee').textContent = `-₹${fee.toFixed(2)}`;
+      document.getElementById('wth-breakdown-net').textContent = `₹${net.toFixed(2)}`;
+    }
+
+    function togglePayoutFields(type) {
+      if (type === 'UPI') {
+        document.getElementById('field-upi').classList.remove('hidden');
+        document.getElementById('field-bank').classList.add('hidden');
+      } else {
+        document.getElementById('field-upi').classList.add('hidden');
+        document.getElementById('field-bank').classList.remove('hidden');
+      }
+    }
+
+    async function submitWithdrawal() {
+      const amount = Number(document.getElementById('wth-amount-input').value);
+      if (!amount || amount < 100) {
+        alert('Minimum withdrawal amount is ₹100.');
+        return;
+      }
+
+      const method = document.querySelector('input[name="payoutMethod"]:checked').value;
+      const payoutDetails = {};
+
+      if (method === 'UPI') {
+        const upi = document.getElementById('wth-upi-id').value.trim();
+        if (!upi) { alert('Please enter your UPI ID'); return; }
+        payoutDetails.upiId = upi;
+      } else {
+        const acc = document.getElementById('wth-bank-acc').value.trim();
+        const ifsc = document.getElementById('wth-bank-ifsc').value.trim();
+        const name = document.getElementById('wth-bank-name').value.trim();
+        if (!acc || !ifsc || !name) { alert('Please enter complete bank account details'); return; }
+        payoutDetails.accountNumber = acc;
+        payoutDetails.ifsc = ifsc;
+        payoutDetails.beneficiaryName = name;
+      }
+
+      try {
+        const res = await fetch('/api/creator/withdraw', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: currentUserId,
+            amount,
+            payoutMethod: method,
+            payoutDetails
+          })
+        });
+
+        const json = await res.json();
+        if (!json.success) {
+          alert(`Error: ${json.message}`);
+          return;
+        }
+
+        alert('✅ Payout request submitted! Your funds have been locked and sent to the Admin Panel for approval.');
+        closeWithdrawModal();
+      } catch (err) {
+        alert('Failed to submit withdrawal: ' + err.message);
+      }
+    }
+
+    // ==============================================
+    // ADMIN PANEL DATA & ACTIONS
+    // ==============================================
+    async function loadAdminMetrics() {
+      try {
+        const res = await fetch('/api/admin/metrics');
+        const json = await res.json();
+        if (json.success && json.data) {
+          const m = json.data;
+          document.getElementById('admin-xenpay-bal').textContent = `₹${m.xenpayLiveBalance.balance.toFixed(2)}`;
+          document.getElementById('admin-creators-bal').textContent = `₹${m.creatorsSummary.totalWithdrawableLiability.toFixed(2)}`;
+          document.getElementById('admin-net-profit').textContent = `₹${m.adminProfitSummary.totalAdminProfit.toFixed(2)}`;
+          document.getElementById('admin-pending-count').textContent = m.pendingWithdrawalsCount;
+        }
+
+        // Load Pending Withdrawals
+        const wthRes = await fetch('/api/admin/withdrawals');
+        const wthData = await wthRes.json();
+        if (wthData.success) {
+          renderAdminWithdrawals(wthData.data);
+        }
+
+        // Load Deposits Audit
+        const depRes = await fetch('/api/admin/deposits');
+        const depData = await depRes.json();
+        if (depData.success) {
+          renderAdminDeposits(depData.data);
+        }
+
+        // Load Creators
+        const crRes = await fetch('/api/admin/creators');
+        const crData = await crRes.json();
+        if (crData.success) {
+          renderAdminCreators(crData.data);
+        }
+      } catch (err) {
+        console.error('Failed to load admin metrics:', err);
+      }
+    }
+
+    function renderAdminWithdrawals(list) {
+      const tbody = document.getElementById('admin-withdrawals-body');
+      const pending = list.filter(w => w.status === 'PENDING_APPROVAL');
+
+      if (!pending || pending.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-dim); padding: 24px;">✓ No pending withdrawals! All payouts settled.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = pending.map(w => {
+        const dest = w.payoutMethod === 'UPI' ? `UPI: ${w.payoutDetails.upiId}` : `Bank: ${w.payoutDetails.accountNumber} (${w.payoutDetails.ifsc})`;
+        return `
+          <tr>
+            <td>
+              <strong style="color: #fff;">${w.userName}</strong><br>
+              <span style="font-size: 11px; color: var(--text-dim);">${w.userEmail}</span>
+            </td>
+            <td class="mono" style="font-weight: 700; color: #fff;">₹${w.amount.toFixed(2)}</td>
+            <td class="mono" style="color: #f87171;">₹${w.adminFee.toFixed(2)}</td>
+            <td class="mono val-emerald" style="font-weight: 700;">₹${w.netPayout.toFixed(2)}</td>
+            <td class="mono" style="font-size: 11px;">${dest}</td>
+            <td style="font-size: 11px;">${new Date(w.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
+            <td>
+              <div style="display: flex; gap: 6px;">
+                <button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="approveWithdrawal('${w.id}')">✓ Approve</button>
+                <button class="btn btn-danger" style="padding: 6px 12px; font-size: 12px;" onclick="rejectWithdrawal('${w.id}')">✕ Reject</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function approveWithdrawal(id) {
+      const utr = prompt('Enter Bank Payout Reference / UTR for this settlement (or leave blank to auto-generate):', `UTR_PAY_${Date.now()}`);
+      if (utr === null) return; // User cancelled
+
+      try {
+        const res = await fetch(`/api/admin/withdrawals/${id}/approve`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ payoutUtr: utr })
+        });
+        const json = await res.json();
+        if (json.success) {
+          alert('✅ Payout Approved and Settled to Creator! Admin Profit recorded.');
+          loadAdminMetrics();
+        } else {
+          alert('Error: ' + json.message);
+        }
+      } catch (e) {
+        alert('Action failed: ' + e.message);
+      }
+    }
+
+    async function rejectWithdrawal(id) {
+      const reason = prompt('Enter reason for rejection (Funds will be refunded back to creator immediately):', 'Invalid UPI / Bank details');
+      if (reason === null) return;
+
+      try {
+        const res = await fetch(`/api/admin/withdrawals/${id}/reject`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reason })
+        });
+        const json = await res.json();
+        if (json.success) {
+          alert('Withdrawal Rejected. Creator wallet refunded.');
+          loadAdminMetrics();
+        } else {
+          alert('Error: ' + json.message);
+        }
+      } catch (e) {
+        alert('Action failed: ' + e.message);
+      }
+    }
+
+    function renderAdminDeposits(deposits) {
+      const tbody = document.getElementById('admin-deposits-body');
+      if (!deposits || deposits.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-dim);">No deposits recorded yet.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = deposits.map(d => {
+        let statusBadge = `<span class="badge badge-pending">PENDING</span>`;
+        if (d.status === 'SUCCESS') statusBadge = `<span class="badge badge-success">PAID</span>`;
+        else if (d.status === 'EXPIRED') statusBadge = `<span class="badge badge-expired">EXPIRED</span>`;
+
+        return `
+          <tr>
+            <td class="mono" style="font-size: 11px;">${d.merchantOrderId}</td>
+            <td>${d.userName}</td>
+            <td class="mono" style="font-weight: 700; color: #fff;">₹${d.grossAmount.toFixed(2)}</td>
+            <td class="mono" style="color: #f87171;">₹${d.adminFee.toFixed(2)}</td>
+            <td class="mono" style="color: #fbbf24;">₹${d.xenpayFee.toFixed(2)}</td>
+            <td class="mono val-emerald" style="font-weight: 800;">+₹${d.adminProfit.toFixed(2)}</td>
+            <td>${statusBadge}</td>
+            <td class="mono" style="font-size: 11px;">${d.utr || '-'}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderAdminCreators(creators) {
+      const tbody = document.getElementById('admin-creators-body');
+      if (!creators || creators.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-dim);">No creators joined yet.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = creators.map(c => `
+        <tr>
+          <td><strong style="color: #fff;">${c.name}</strong></td>
+          <td class="mono" style="font-size: 12px;">${c.email}</td>
+          <td class="mono">₹${c.depositBalance.toFixed(2)}</td>
+          <td class="mono val-emerald" style="font-weight: 700;">₹${c.withdrawableBalance.toFixed(2)}</td>
+          <td class="mono val-amber">₹${c.pendingWithdrawalBalance.toFixed(2)}</td>
+          <td style="font-size: 11px;">${new Date(c.createdAt).toLocaleDateString()}</td>
+        </tr>
+      `).join('');
+    }
+  </script>
+</body>
+</html>

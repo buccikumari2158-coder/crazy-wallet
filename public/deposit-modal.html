@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crazy Wallet - Deposit via XenPay</title>
+  <!-- Optional client-side QR generation fallback using CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-card {
+      background: #ffffff;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .badge {
+      display: inline-block;
+      background: #eef2ff;
+      color: #4f46e5;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .modal-title { font-size: 18px; font-weight: 700; color: #0f172a; }
+    .close-btn {
+      background: none; border: none; font-size: 20px; color: #94a3b8; cursor: pointer;
+    }
+    .modal-body { padding: 24px; display: flex; flex-direction: column; align-items: center; }
+    .amount-box {
+      width: 100%;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .amount-label { font-size: 13px; color: #64748b; font-weight: 500; }
+    .amount-value { font-size: 22px; font-weight: 800; color: #0f172a; }
+    .timer-pill {
+      font-size: 13px;
+      color: #64748b;
+      margin-bottom: 16px;
+      font-weight: 500;
+    }
+    .timer-pill strong { color: #dc2626; font-weight: 700; }
+    .qr-container {
+      background: #ffffff;
+      padding: 16px;
+      border: 2px dashed #cbd5e1;
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    #qrcode-canvas, #qrcode-img {
+      width: 220px;
+      height: 220px;
+      display: block;
+      border-radius: 8px;
+    }
+    .qr-hint {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #64748b;
+      text-align: center;
+    }
+    .actions {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .btn-pay {
+      background: #4f46e5;
+      color: #ffffff;
+      font-size: 15px;
+      font-weight: 600;
+      padding: 14px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+      transition: all 0.2s ease;
+    }
+    .btn-pay:hover { background: #4338ca; transform: translateY(-1px); }
+    .btn-copy {
+      background: #f1f5f9;
+      color: #334155;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn-copy:hover { background: #e2e8f0; }
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: #64748b;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(0.9); opacity: 0.7; }
+      50% { transform: scale(1.3); opacity: 1; }
+      100% { transform: scale(0.9); opacity: 0.7; }
+    }
+    .success-screen {
+      display: none;
+      padding: 32px 24px;
+      text-align: center;
+    }
+    .success-icon {
+      width: 64px;
+      height: 64px;
+      background: #dcfce7;
+      color: #16a34a;
+      font-size: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      margin: 0 auto 16px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="modal-card">
+    <div class="modal-header">
+      <div>
+        <span class="badge">XenPay Gateway</span>
+        <h1 class="modal-title">Deposit to Crazy Wallet</h1>
+      </div>
+      <button class="close-btn" onclick="alert('Close modal')">✕</button>
+    </div>
+
+    <!-- Payment Pending Screen -->
+    <div class="modal-body" id="payment-view">
+      <div class="amount-box">
+        <span class="amount-label">Deposit Amount</span>
+        <span class="amount-value" id="display-amount">₹500.00</span>
+      </div>
+
+      <div class="timer-pill">
+        <span>Window closes in: </span><strong id="display-timer">14:59</strong>
+      </div>
+
+      <!-- QR Code Display Area -->
+      <div class="qr-container">
+        <canvas id="qrcode-canvas"></canvas>
+        <p class="qr-hint">Scan with GPay, PhonePe, Paytm, or any UPI app</p>
+      </div>
+
+      <!-- Dual Action: Click to Pay & Copy Link -->
+      <div class="actions">
+        <button class="btn-pay" id="btn-click-pay">
+          📱 Click to Pay / Open UPI App
+        </button>
+        <button class="btn-copy" id="btn-copy-link">
+          📋 Copy Payment Link
+        </button>
+      </div>
+
+      <!-- Active Polling Status -->
+      <div class="status-bar">
+        <div class="status-dot"></div>
+        <span id="status-text">Awaiting payment verification (auto-polling)...</span>
+      </div>
+    </div>
+
+    <!-- Success Screen (Shown once polling or webhook confirms payment) -->
+    <div class="success-screen" id="success-view">
+      <div class="success-icon">✓</div>
+      <h2 style="font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">
+        Payment Received!
+      </h2>
+      <p style="font-size: 14px; color: #64748b; margin-bottom: 20px;">
+        Your wallet has been credited successfully.
+      </p>
+      <div style="background: #f8fafc; padding: 12px; border-radius: 8px; font-size: 12px; color: #475569; margin-bottom: 20px; text-align: left;">
+        <div><strong>Order ID:</strong> <span id="success-order-id">-</span></div>
+        <div><strong>UTR / Ref:</strong> <span id="success-utr">-</span></div>
+      </div>
+      <button class="btn-pay" style="width: 100%;" onclick="window.location.reload()">Done</button>
+    </div>
+  </div>
+
+  <script>
+    // Configuration & State
+    const paymentData = {
+      merchantOrderId: "CW_DEP_TEST_123",
+      amount: 500,
+      paymentUrl: "https://xen-pays.space/pay/?id=ORDA1B2C3D4E5F6"
+    };
+
+    let remainingSeconds = 900; // 15 mins
+    let pollInterval = null;
+
+    // 1. Render QR Code (Client-Side Canvas fallback or use backend data URL)
+    if (window.QRCode) {
+      QRCode.toCanvas(document.getElementById('qrcode-canvas'), paymentData.paymentUrl, {
+        width: 220,
+        margin: 1,
+        color: { dark: '#0f172a', light: '#ffffff' }
+      }, function (error) {
+        if (error) console.error(error);
+      });
+    }
+
+    // 2. Click to Pay Action
+    document.getElementById('btn-click-pay').addEventListener('click', () => {
+      window.open(paymentData.paymentUrl, '_blank');
+    });
+
+    // 3. Copy Link Action
+    document.getElementById('btn-copy-link').addEventListener('click', () => {
+      navigator.clipboard.writeText(paymentData.paymentUrl).then(() => {
+        const btn = document.getElementById('btn-copy-link');
+        const originalText = btn.textContent;
+        btn.textContent = '✓ Copied to Clipboard!';
+        setTimeout(() => { btn.textContent = originalText; }, 2000);
+      });
+    });
+
+    // 4. Countdown Timer
+    const timerInterval = setInterval(() => {
+      remainingSeconds--;
+      if (remainingSeconds <= 0) {
+        clearInterval(timerInterval);
+        if (pollInterval) clearInterval(pollInterval);
+        document.getElementById('display-timer').textContent = "00:00 (Expired)";
+        document.getElementById('display-timer').style.color = '#ef4444';
+        return;
+      }
+      const mins = Math.floor(remainingSeconds / 60);
+      const secs = remainingSeconds % 60;
+      document.getElementById('display-timer').textContent =
+        `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }, 1000);
+
+    // 5. Active Polling Fallback Implementation
+    function startPolling(merchantOrderId) {
+      pollInterval = setInterval(async () => {
+        try {
+          const response = await fetch(`/api/deposit/check/${merchantOrderId}`);
+          if (!response.ok) return;
+
+          const json = await response.json();
+          if (json.success && json.data) {
+            if (json.data.status === 'SUCCESS') {
+              clearInterval(pollInterval);
+              clearInterval(timerInterval);
+              showSuccess(json.data);
+            }
+          }
+        } catch (err) {
+          console.warn('Status poll check skipped:', err);
+        }
+      }, 3000); // Poll every 3 seconds
+    }
+
+    function showSuccess(data) {
+      document.getElementById('payment-view').style.display = 'none';
+      document.getElementById('success-view').style.display = 'block';
+      document.getElementById('success-order-id').textContent = data.merchantOrderId || paymentData.merchantOrderId;
+      document.getElementById('success-utr').textContent = data.utr || 'Confirmed via XenPay';
+    }
+
+    // Start polling automatically
+    // startPolling(paymentData.merchantOrderId);
+  </script>
+</body>
+</html>
