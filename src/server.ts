@@ -39,9 +39,11 @@ export function createApp() {
   return app;
 }
 
-// Start server if executed directly
-if (process.env.NODE_ENV !== 'test') {
-  const app = createApp();
+const app = createApp();
+export default app;
+
+// Start server if executed directly (and not on Vercel serverless)
+if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
     console.log(`\n======================================================`);
