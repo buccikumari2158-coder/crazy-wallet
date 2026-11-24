@@ -37,5 +37,6 @@ paymentRouter.post('/admin/withdrawals/:id/reject', rejectWithdrawalHandler);
 paymentRouter.get('/admin/deposits', getAdminDepositsHandler);
 paymentRouter.get('/admin/creators', getAdminCreatorsHandler);
 
-// XenPay Webhook
+// XenPay Webhook (supports both /xenpay and /xenpa typo)
 paymentRouter.post('/webhook/xenpay', handleWebhook);
+paymentRouter.post('/webhook/xenpa', handleWebhook);
